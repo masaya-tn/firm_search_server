@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2023_06_09_150521) do
+ActiveRecord::Schema.define(version: 2023_06_09_152912) do
 
   create_table "firms", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "code", null: false
@@ -26,4 +26,15 @@ ActiveRecord::Schema.define(version: 2023_06_09_150521) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "performances", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci", force: :cascade do |t|
+    t.integer "sales", null: false
+    t.integer "profits", null: false
+    t.string "year", null: false
+    t.bigint "firm_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["firm_id"], name: "index_performances_on_firm_id"
+  end
+
+  add_foreign_key "performances", "firms"
 end
