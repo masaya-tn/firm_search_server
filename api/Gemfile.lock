@@ -98,6 +98,7 @@ GEM
     nio4r (2.5.9)
     nokogiri (1.15.2-x86_64-linux)
       racc (~> 1.4)
+    psych (3.3.4)
     puma (4.3.12)
       nio4r (~> 2.0)
     racc (1.7.0)
@@ -166,9 +167,11 @@ DEPENDENCIES
   byebug
   listen (~> 3.2)
   mysql2 (>= 0.4.4)
+  psych (~> 3.1)
   puma (~> 4.1)
   rack-cors
   rails (~> 6.0.6, >= 6.0.6.1)
+  rake
   spring
   spring-watcher-listen (~> 2.0.0)
   tzinfo-data
