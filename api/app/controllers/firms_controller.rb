@@ -1,5 +1,9 @@
 class FirmsController < ApplicationController
-  def index
+  def show
+    firm = Firm.left_joins(:performances).find(params[:id])
+    firm_performances = Performance.where(firm_id: firm.id)
+
+    render json: {firm: firm, performance: firm_performances}
   end
 
   def search
