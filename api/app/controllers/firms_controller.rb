@@ -14,15 +14,21 @@ class FirmsController < ApplicationController
 
     for year in @sales_param.keys do
       @performance = Performance.find_by(firm_id: @firm.id, year: year)
-      @performance.update(sales: @sales_param[year])
+      @performance.update!(sales: @sales_param[year])
     end
 
     for year in @profits_param.keys do
       @performance = Performance.find_by(firm_id: @firm.id, year: year)
-      @performance.update(profits: @profits_param[year])
+      @performance.update!(profits: @profits_param[year])
     end
     
-    render json: {message: 'ok'}
+    render json: {message: 'success'}
+  end
+
+  def destroy
+    @firm = Firm.find(params[:id])
+    @firm.destroy!
+    render json: {message: 'success'}
   end
 
   def search
