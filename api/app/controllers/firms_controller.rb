@@ -6,6 +6,20 @@ class FirmsController < ApplicationController
     render json: {firm: firm, performance: firm_performances}
   end
 
+  def create
+    Firm.transaction do
+      @firm = Firm.create!(params.require(:firm).permit(:code, :firm_name, :firm_name_kana, :status, :post_code, :address, :representive, :representive_kana, :phone_number))
+      @sales_params = params.require(:sales).permit("2022", "2021", "2020")
+      @profits_params = params.require(:profits).permit("2022", "2021", "2020")
+
+      for year in @sales_params.keys do
+        @firm.performances.create!(firm_id: @firm_id, year: year, sales: @sales_params[year], profits: @profits_params[year])
+      end
+    end
+
+    render json: {message: 'success'}
+  end
+
   def update
     @firm = Firm.find(params[:firm][:id])
     @firm.update(params.require(:firm).permit(:code, :firm_name, :firm_name_kana, :status, :post_code, :address, :representive, :representive_kana, :phone_number))
@@ -14,14 +28,9 @@ class FirmsController < ApplicationController
 
     for year in @sales_param.keys do
       @performance = Performance.find_by(firm_id: @firm.id, year: year)
-      @performance.update!(sales: @sales_param[year])
+      @performance.update!(sales: @sales_param[year], profits: @profits_param[year])
     end
 
-    for year in @profits_param.keys do
-      @performance = Performance.find_by(firm_id: @firm.id, year: year)
-      @performance.update!(profits: @profits_param[year])
-    end
-    
     render json: {message: 'success'}
   end
 
