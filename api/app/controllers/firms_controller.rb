@@ -6,6 +6,25 @@ class FirmsController < ApplicationController
     render json: {firm: firm, performance: firm_performances}
   end
 
+  def update
+    @firm = Firm.find(params[:firm][:id])
+    @firm.update(params.require(:firm).permit(:code, :firm_name, :firm_name_kana, :status, :post_code, :address, :representive, :representive_kana, :phone_number))
+    @sales_param = params.require(:sales).permit("2022", "2021", "2020")
+    @profits_param = params.require(:profits).permit("2022", "2021", "2020")
+
+    for year in @sales_param.keys do
+      @performance = Performance.find_by(firm_id: @firm.id, year: year)
+      @performance.update(sales: @sales_param[year])
+    end
+
+    for year in @profits_param.keys do
+      @performance = Performance.find_by(firm_id: @firm.id, year: year)
+      @performance.update(profits: @profits_param[year])
+    end
+    
+    render json: {message: 'ok'}
+  end
+
   def search
     @status = params[:status]
     @firm_name = params[:firmName]
@@ -54,4 +73,12 @@ class FirmsController < ApplicationController
                 
       render json: { firms: firms }
   end
+
+  def firm_update_params
+    params.permit(firm:[:id, :code, :firm_name, :firm_name_kana, :status, :post_code, :address, :representive, :representive_kana, :phone_number], 
+                  sales:["2022", "2021", "2020"],
+                  profits:["2022", "2021", "2020"]
+                )
+  end
+
 end
