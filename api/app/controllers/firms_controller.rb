@@ -1,5 +1,5 @@
 class FirmsController < ApplicationController
-  before_action :authenticate_user!, only: [:create, :update, :destroy]
+  before_action :authenticate_user!
 
   def show
     firm = Firm.left_joins(:performances).find(params[:id])
@@ -54,6 +54,7 @@ class FirmsController < ApplicationController
     @profits_max = params[:profitsMax]
     @profits_min = params[:profitsMin]
     @search_pattern = params[:searchPattern]
+
     case @search_pattern
     when '' then
       render json: {message: 'no result'}
@@ -71,8 +72,8 @@ class FirmsController < ApplicationController
   def and_search()
     firms = Firm.includes(:performances)
                 .yield_self{|firms| @status.present? ? firms.where(status: @status.to_i) : firms}
-                .yield_self{|firms| @firm_name.present? ? firms.where(firm_name: @firm_name) : firms}
-                .yield_self{|firms| @address.present? ? firms.where("address LIKE ?", "%#{@address}%") : firms}
+                .yield_self{|firms| @firm_name.present? ? firms.where("firm_name LIKE ?", "%#{Firm.sanitize_sql_like(@firm_name)}%") : firms}
+                .yield_self{|firms| @address.present? ? firms.where("address LIKE ?", "%#{Firm.sanitize_sql_like(@address)}%") : firms}
                 .yield_self{|firms| @sales_max.present? ? firms.where(performances: {sales: ..@sales_max.to_i, year: "2022"}) : firms}
                 .yield_self{|firms| @sales_min.present? ? firms.where(performances: {sales: @sales_min.to_i.., year: "2022"}) : firms}
                 .yield_self{|firms| @profits_max.present? ? firms.where(performances: {profits: ..@profits_max.to_i, year: "2022"}) : firms}
@@ -82,15 +83,19 @@ class FirmsController < ApplicationController
   end
 
   def or_search()
+    p @sales_max
+    p @sales_min
+    p @profits_max
+    p @profits_min
     firms = Firm.includes(:performances)
                 .none
                 .yield_self{|firms| @status.present? ? firms.or(Firm.includes(:performances).where(status: @status.to_i)) : firms}
-                .yield_self{|firms| @firm_name.present? ? firms.or(Firm.includes(:performances).where(firm_name: @firm_name)) : firms}
-                .yield_self{|firms| @address.present? ? firms.or(Firm.includes(:performances).where("address LIKE ?", "%#{@address}%")) : firms}
-                .yield_self{|firms| @sales_max.present? && @sales_min.present? ? firms.or(Firm.includes(:performances).where(performances: {sales: @sales_min..@sales_max.to_i, year: "2022"})) : firms}
+                .yield_self{|firms| @firm_name.present? ? firms.or(Firm.includes(:performances).where("firm_name LIKE ?", "%#{Firm.sanitize_sql_like(@firm_name)}%")) : firms}
+                .yield_self{|firms| @address.present? ? firms.or(Firm.includes(:performances).where("address LIKE ?", "%#{Firm.sanitize_sql_like(@address)}%")) : firms}
+                .yield_self{|firms| @sales_max.present? && @sales_min.present? ? firms.or(Firm.includes(:performances).where(performances: {sales: @sales_min.to_i..@sales_max.to_i, year: "2022"})) : firms}
                 .yield_self{|firms| @sales_max.present? && @sales_min.blank? ? firms.or(Firm.includes(:performances).where(performances: {sales: ..@sales_max.to_i, year: "2022"})) : firms}
                 .yield_self{|firms| @sales_max.blank? && @sales_min.present? ? firms.or(Firm.includes(:performances).where(performances: {sales: @sales_min.to_i.., year: "2022"})) : firms}
-                .yield_self{|firms| @profits_max.present? && @profits_min.present? ? firms.or(Firm.includes(:performances).where(performances: {profits: @profits_min..@profits_max.to_i, year: "2022"})) : firms}
+                .yield_self{|firms| @profits_max.present? && @profits_min.present? ? firms.or(Firm.includes(:performances).where(performances: {profits: @profits_min.to_i..@profits_max.to_i, year: "2022"})) : firms}
                 .yield_self{|firms| @profits_max.present? && @profits_min.blank? ? firms.or(Firm.includes(:performances).where(performances: {profits: ..@profits_max.to_i, year: "2022"})) : firms}
                 .yield_self{|firms| @profits_max.blank? && @profits_min.present? ? firms.or(Firm.includes(:performances).where(performances: {profits: @profits_min.to_i.., year: "2022"})) : firms}
                     
