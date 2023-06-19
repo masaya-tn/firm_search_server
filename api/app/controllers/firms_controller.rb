@@ -83,10 +83,6 @@ class FirmsController < ApplicationController
   end
 
   def or_search()
-    p @sales_max
-    p @sales_min
-    p @profits_max
-    p @profits_min
     firms = Firm.includes(:performances)
                 .none
                 .yield_self{|firms| @status.present? ? firms.or(Firm.includes(:performances).where(status: @status.to_i)) : firms}

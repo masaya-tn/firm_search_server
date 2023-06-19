@@ -6,11 +6,6 @@ class UsersController < ApplicationController
     render json: { users: users }
   end
 
-  def show
-    user = User.find(params[:id])
-    render json: {user: user}
-  end
-
   def update
     render json: {message: 'error'} if current_user.admin == false
     @user = User.find(params[:user][:id])
